@@ -5,13 +5,13 @@ A TypeScript/Node.js client for the [Hevy app](https://www.hevyapp.com/) API.
 ## Installation
 
 ```bash
-npm install hevy-api-client
+npm install hevy-client
 ```
 
 ## Usage
 
 ```typescript
-import { HevyClient } from "hevy-api-client";
+import { HevyClient } from "hevy-client";
 
 const client = new HevyClient("your-api-key");
 
