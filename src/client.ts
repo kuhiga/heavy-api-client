@@ -94,7 +94,6 @@ export class HevyClient {
     params: Pagination & { since?: string } = {
       page: 1,
       pageSize: 5,
-      since: "1970-01-01T00:00:00Z",
     }
   ): Promise<WorkoutEventsResponse> {
     return this.request("/workouts/events", { method: "GET" }, params);

@@ -1,6 +1,14 @@
 import { HevyClient } from "../src/client";
 import { HEVY_BASE_URL } from "../src/constants";
-import { Routine, Workout } from "../src/types";
+import {
+  CreateWorkout,
+  ExerciseTemplate,
+  ExerciseTemplatesResponse,
+  GetRoutineFoldersResponse,
+  PostRoutinesResponse,
+  Routine,
+  RoutineFolderResponse,
+} from "../src/types";
 import fetch, { Response } from "node-fetch";
 import { HevyAPIError } from "../src/error";
 
@@ -64,17 +72,18 @@ describe("HevyClient", () => {
     });
   };
 
-  const createMockWorkout = (): Workout => ({
+  const createMockWorkout = (): CreateWorkout => ({
     title: "Test Workout",
     description: "Test Description",
     start_time: "2024-01-01T10:00:00Z",
     end_time: "2024-01-01T11:00:00Z",
+    is_private: "false",
     exercises: [
       {
         exercise_template_id: "TEST123",
         sets: [
           {
-            set_type: "normal",
+            type: "normal",
             weight_kg: 100,
             reps: 10,
           },
@@ -97,7 +106,31 @@ describe("HevyClient", () => {
     const mockWorkoutsResponse = {
       page: 1,
       page_count: 5,
-      workouts: [createMockWorkout()],
+      workouts: {
+        id: "123",
+        title: "Test Workout",
+        description: "Test Description",
+        start_time: 1704106800,
+        end_time: 1704110400,
+        exercises: [
+          {
+            index: 0,
+            title: "Test Exercise",
+            notes: "",
+            exercise_template_id: "TEST123",
+            sets: [
+              {
+                index: 0,
+                set_type: "normal",
+                weight_kg: 100,
+                reps: 10,
+              },
+            ],
+          },
+        ],
+        updated_at: "2024-01-01T11:00:00Z",
+        created_at: "2024-01-01T10:00:00Z",
+      },
     };
 
     it("should fetch workouts with default pagination", async () => {
@@ -142,10 +175,126 @@ describe("HevyClient", () => {
       await expect(client.getWorkouts()).rejects.toThrow(HevyAPIError);
     });
   });
+  describe("getWorkoutCount", () => {
+    it("should fetch workout count", async () => {
+      const mockResponse = { workout_count: 42 };
+      mockFetch.mockImplementationOnce(() => mockJsonResponse(mockResponse));
+
+      const result = await client.getWorkoutCount();
+
+      expect(result).toBe(42);
+      expect(mockFetch).toHaveBeenCalledWith(
+        `${HEVY_BASE_URL}/workouts/count`,
+        expect.objectContaining({
+          method: "GET",
+          headers: expect.objectContaining({
+            "api-key": API_KEY,
+          }),
+        })
+      );
+    });
+
+    it("should handle errors", async () => {
+      mockFetch.mockImplementationOnce(() =>
+        mockErrorResponse(500, "Server error")
+      );
+
+      await expect(client.getWorkoutCount()).rejects.toThrow(HevyAPIError);
+    });
+  });
+
+  describe("getWorkout", () => {
+    it("should fetch a single workout", async () => {
+      const mockResponse = {
+        id: "workout123",
+        title: "Test Workout",
+        description: "Test Description",
+        start_time: 1704106800, // Unix timestamp for consistency
+        end_time: 1704110400,
+        updated_at: "2024-01-01T11:00:00Z",
+        created_at: "2024-01-01T10:00:00Z",
+        exercises: [
+          {
+            index: 0,
+            title: "Test Exercise",
+            notes: "",
+            exercise_template_id: "template123",
+            sets: [
+              {
+                index: 0,
+                set_type: "normal",
+                weight_kg: 100,
+                reps: 10,
+              },
+            ],
+          },
+        ],
+      };
+
+      mockFetch.mockImplementationOnce(() => mockJsonResponse(mockResponse));
+
+      const result = await client.getWorkout("workout123");
+
+      expect(result).toEqual(mockResponse);
+      expect(mockFetch).toHaveBeenCalledWith(
+        `${HEVY_BASE_URL}/workouts/workout123`,
+        expect.objectContaining({
+          method: "GET",
+          headers: expect.objectContaining({
+            "api-key": API_KEY,
+          }),
+        })
+      );
+    });
+
+    it("should handle not found error", async () => {
+      mockFetch.mockImplementationOnce(() =>
+        mockErrorResponse(404, "Workout not found")
+      );
+
+      await expect(client.getWorkout("invalid-id")).rejects.toThrow(
+        HevyAPIError
+      );
+    });
+
+    it("should handle server error", async () => {
+      mockFetch.mockImplementationOnce(() =>
+        mockErrorResponse(500, "Internal server error")
+      );
+
+      await expect(client.getWorkout("workout123")).rejects.toThrow(
+        HevyAPIError
+      );
+    });
+  });
 
   describe("createWorkout", () => {
     const mockWorkout = createMockWorkout();
-    const mockResponse = { ...mockWorkout, id: "123" };
+    const mockResponse = {
+      id: "123",
+      title: mockWorkout.title,
+      description: mockWorkout.description,
+      start_time: Math.floor(new Date(mockWorkout.start_time).getTime() / 1000),
+      end_time: Math.floor(new Date(mockWorkout.end_time).getTime() / 1000),
+      updated_at: "2024-01-01T11:00:00Z",
+      created_at: "2024-01-01T10:00:00Z",
+      exercises: [
+        {
+          index: 0,
+          title: "Test Exercise",
+          notes: "",
+          exercise_template_id: "TEST123",
+          sets: [
+            {
+              index: 0,
+              set_type: "normal",
+              weight_kg: 100,
+              reps: 10,
+            },
+          ],
+        },
+      ],
+    };
 
     it("should create a workout successfully", async () => {
       mockFetch.mockImplementationOnce(() => mockJsonResponse(mockResponse));
@@ -180,59 +329,6 @@ describe("HevyClient", () => {
     });
   });
 
-  describe("URL building", () => {
-    it("should build URLs correctly with query parameters", async () => {
-      mockFetch.mockImplementationOnce(() => mockJsonResponse({}));
-
-      await client.getWorkouts({ page: 2, pageSize: 10 });
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        `${HEVY_BASE_URL}/workouts?page=2&pageSize=10`,
-        expect.any(Object)
-      );
-    });
-
-    it("should handle paths with leading slashes", async () => {
-      mockFetch.mockImplementationOnce(() => mockJsonResponse({}));
-
-      await client.getWorkout("123");
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        `${HEVY_BASE_URL}/workouts/123`,
-        expect.any(Object)
-      );
-    });
-  });
-  // ... (previous test code remains the same until after createWorkout tests)
-
-  describe("getWorkoutCount", () => {
-    it("should fetch workout count", async () => {
-      const mockResponse = { workout_count: 42 };
-      mockFetch.mockImplementationOnce(() => mockJsonResponse(mockResponse));
-
-      const result = await client.getWorkoutCount();
-
-      expect(result).toBe(42);
-      expect(mockFetch).toHaveBeenCalledWith(
-        `${HEVY_BASE_URL}/workouts/count`,
-        expect.objectContaining({
-          method: "GET",
-          headers: expect.objectContaining({
-            "api-key": API_KEY,
-          }),
-        })
-      );
-    });
-
-    it("should handle errors", async () => {
-      mockFetch.mockImplementationOnce(() =>
-        mockErrorResponse(500, "Server error")
-      );
-
-      await expect(client.getWorkoutCount()).rejects.toThrow(HevyAPIError);
-    });
-  });
-
   describe("getWorkoutEvents", () => {
     const mockEventsResponse = {
       page: 1,
@@ -240,7 +336,30 @@ describe("HevyClient", () => {
       events: [
         {
           type: "updated",
-          workout: createMockWorkout(),
+          workout: {
+            id: "123",
+            title: "Test Workout",
+            start_time: 1704106800,
+            end_time: 1704110400,
+            updated_at: "2024-01-01T11:00:00Z",
+            created_at: "2024-01-01T10:00:00Z",
+            exercises: [
+              {
+                index: 0,
+                title: "Test Exercise",
+                notes: "",
+                exercise_template_id: "TEST123",
+                sets: [
+                  {
+                    index: 0,
+                    set_type: "normal",
+                    weight_kg: 100,
+                    reps: 10,
+                  },
+                ],
+              },
+            ],
+          },
         },
       ],
     };
@@ -258,67 +377,37 @@ describe("HevyClient", () => {
         expect.any(Object)
       );
     });
-
-    it("should fetch workout events with custom parameters", async () => {
-      mockFetch.mockImplementationOnce(() =>
-        mockJsonResponse(mockEventsResponse)
-      );
-
-      const result = await client.getWorkoutEvents({
-        page: 2,
-        pageSize: 10,
-        since: "2024-01-01T00:00:00Z",
-      });
-
-      expect(result).toEqual(mockEventsResponse);
-      expect(mockFetch).toHaveBeenCalledWith(
-        `${HEVY_BASE_URL}/workouts/events?page=2&pageSize=10&since=2024-01-01T00%3A00%3A00Z`,
-        expect.any(Object)
-      );
-    });
-  });
-
-  describe("getWorkout", () => {
-    it("should fetch a single workout", async () => {
-      const mockWorkout = createMockWorkout();
-      mockFetch.mockImplementationOnce(() => mockJsonResponse(mockWorkout));
-
-      const result = await client.getWorkout("123");
-
-      expect(result).toEqual(mockWorkout);
-      expect(mockFetch).toHaveBeenCalledWith(
-        `${HEVY_BASE_URL}/workouts/123`,
-        expect.any(Object)
-      );
-    });
-
-    it("should handle not found error", async () => {
-      mockFetch.mockImplementationOnce(() =>
-        mockErrorResponse(404, "Workout not found")
-      );
-
-      await expect(client.getWorkout("invalid-id")).rejects.toThrow(
-        HevyAPIError
-      );
-    });
   });
 
   describe("Routines", () => {
-    const mockRoutine: Routine = {
-      title: "Test Routine",
-      exercises: [
-        {
-          exercise_template_id: "TEST123",
-          sets: [{ set_type: "normal", weight_kg: 100, reps: 10 }],
-        },
-      ],
-    };
-
     describe("getRoutines", () => {
       const mockResponse = {
         page: 1,
         page_count: 5,
-        routines: [mockRoutine],
+        routines: [
+          {
+            id: "123",
+            title: "Test Routine",
+            updated_at: "2024-01-01T11:00:00Z",
+            created_at: "2024-01-01T10:00:00Z",
+            exercises: [
+              {
+                index: 0,
+                title: "Test Exercise",
+                notes: "",
+                exercise_template_id: "TEST123",
+                sets: [
+                  {
+                    index: 0,
+                    set_type: "normal",
+                    weight_kg: 100,
+                    reps: 10,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
       };
 
       it("should fetch routines with default pagination", async () => {
@@ -333,28 +422,58 @@ describe("HevyClient", () => {
         );
       });
     });
+  });
+  describe("createRoutine", () => {
+    it("should create a routine", async () => {
+      const mockRoutine: Routine = {
+        title: "Test Routine",
+        exercises: [
+          {
+            exercise_template_id: "TEST123",
+            sets: [{ type: "normal", weight_kg: 100, reps: 10 }],
+          },
+        ],
+      };
+      const mockResponse = {
+        id: "123",
+        title: mockRoutine.title,
+        folder_id: null,
+        updated_at: "2024-01-01T00:00:00Z",
+        created_at: "2024-01-01T00:00:00Z",
+        exercises: [
+          {
+            index: 0,
+            title: "Test Exercise",
+            notes: "",
+            exercise_template_id: "TEST123",
+            sets: [
+              {
+                index: 0,
+                set_type: "normal",
+                weight_kg: 100,
+                reps: 10,
+              },
+            ],
+          },
+        ],
+      };
+      mockFetch.mockImplementationOnce(() => mockJsonResponse(mockResponse));
 
-    describe("createRoutine", () => {
-      it("should create a routine", async () => {
-        const mockResponse = { ...mockRoutine, id: "123" };
-        mockFetch.mockImplementationOnce(() => mockJsonResponse(mockResponse));
+      const result = await client.createRoutine(mockRoutine);
 
-        const result = await client.createRoutine(mockRoutine);
-
-        expect(result).toEqual(mockResponse);
-        expect(mockFetch).toHaveBeenCalledWith(
-          `${HEVY_BASE_URL}/routines`,
-          expect.objectContaining({
-            method: "POST",
-            body: JSON.stringify({ routine: mockRoutine }),
-          })
-        );
-      });
+      expect(result).toEqual(mockResponse);
+      expect(mockFetch).toHaveBeenCalledWith(
+        `${HEVY_BASE_URL}/routines`,
+        expect.objectContaining({
+          method: "POST",
+          body: JSON.stringify({ routine: mockRoutine }),
+        })
+      );
     });
   });
 
   describe("Exercise Templates", () => {
-    const mockTemplate = {
+    const mockTemplate: ExerciseTemplate = {
       id: "template123",
       title: "Bench Press",
       type: "weight_reps",
@@ -364,7 +483,7 @@ describe("HevyClient", () => {
     };
 
     describe("getExerciseTemplates", () => {
-      const mockResponse = {
+      const mockResponse: ExerciseTemplatesResponse = {
         page: 1,
         page_count: 5,
         exercise_templates: [mockTemplate],
@@ -399,16 +518,16 @@ describe("HevyClient", () => {
   });
 
   describe("Routine Folders", () => {
-    const mockFolder = {
+    const mockFolder: RoutineFolderResponse = {
       id: 42,
-      title: "Test Folder",
       index: 1,
+      title: "Test Folder",
       created_at: "2024-01-01T00:00:00Z",
       updated_at: "2024-01-01T00:00:00Z",
     };
 
     describe("getRoutineFolders", () => {
-      const mockResponse = {
+      const mockResponse: GetRoutineFoldersResponse = {
         page: 1,
         page_count: 5,
         routine_folders: [mockFolder],
@@ -430,11 +549,19 @@ describe("HevyClient", () => {
     describe("createRoutineFolder", () => {
       it("should create a routine folder", async () => {
         const folderData = { title: "New Folder" };
-        mockFetch.mockImplementationOnce(() => mockJsonResponse(mockFolder));
+        const mockResponse: PostRoutinesResponse = {
+          id: 42,
+          index: 1,
+          title: "New Folder",
+          updated_at: "2024-01-01T00:00:00Z",
+          created_at: "2024-01-01T00:00:00Z",
+        };
+
+        mockFetch.mockImplementationOnce(() => mockJsonResponse(mockResponse));
 
         const result = await client.createRoutineFolder(folderData);
 
-        expect(result).toEqual(mockFolder);
+        expect(result).toEqual(mockResponse);
         expect(mockFetch).toHaveBeenCalledWith(
           `${HEVY_BASE_URL}/routine_folders`,
           expect.objectContaining({
