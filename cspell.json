@@ -1,6 +1,12 @@
 {
   "version": "0.2",
   "language": "en",
-  "words": ["hevy"],
-  "ignorePaths": ["node_modules/**"]
+  "words": [
+    "dropset",
+    "hevy",
+    "supersets"
+  ],
+  "ignorePaths": [
+    "node_modules/**"
+  ]
 }
