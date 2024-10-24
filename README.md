@@ -1,6 +1,6 @@
 # Hevy API Client
 
-A TypeScript/Node.js client for the Hevy API.
+A TypeScript/Node.js client for the [Hevy app](https://www.hevyapp.com/) API.
 
 ## Installation
 
