@@ -77,7 +77,7 @@ describe("HevyClient", () => {
     description: "Test Description",
     start_time: "2024-01-01T10:00:00Z",
     end_time: "2024-01-01T11:00:00Z",
-    is_private: "false",
+    is_private: false,
     exercises: [
       {
         exercise_template_id: "TEST123",

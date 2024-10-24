@@ -24,12 +24,13 @@ const newWorkout = await client.createWorkout({
   description: "Push day",
   start_time: new Date().toISOString(),
   end_time: new Date().toISOString(),
+  is_private: false,
   exercises: [
     {
       exercise_template_id: "05293BCA",
       sets: [
         {
-          set_type: "normal",
+          type: "normal",
           weight_kg: 100,
           reps: 10,
         },

@@ -31,7 +31,7 @@ export interface CreateWorkout {
   description?: string | null;
   start_time: string;
   end_time: string;
-  is_private: string;
+  is_private: boolean;
   exercises: PostWorkoutsRequestExercise[];
 }
 export interface ExerciseResponse {
@@ -48,7 +48,6 @@ export interface Workout {
   description?: string;
   start_time: number;
   end_time: number;
-  is_private?: boolean;
   exercises: ExerciseResponse[];
   updated_at: string;
   created_at: string;
