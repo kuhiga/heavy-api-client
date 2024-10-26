@@ -120,7 +120,7 @@ export type PostRoutinesRequestBody = {
     /**
      * The folder id the routine should be added to. Pass null to insert the routine into default "My Routines" folder
      */
-    folder_id?: number | null;
+    folder_id: number | null;
     /**
      * Additional notes for the routine.
      */
