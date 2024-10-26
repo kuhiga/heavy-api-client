@@ -20,23 +20,25 @@ const workouts = await client.getWorkouts();
 
 // Create a workout
 const newWorkout = await client.createWorkout({
-  title: "Morning Workout 💪",
-  description: "Push day",
-  start_time: new Date().toISOString(),
-  end_time: new Date().toISOString(),
-  is_private: false,
-  exercises: [
-    {
-      exercise_template_id: "05293BCA",
-      sets: [
-        {
-          type: "normal",
-          weight_kg: 100,
-          reps: 10,
-        },
-      ],
-    },
-  ],
+  workout: {
+    title: "Morning Workout 💪",
+    description: "Push day",
+    start_time: new Date().toISOString(),
+    end_time: new Date().toISOString(),
+    is_private: false,
+    exercises: [
+      {
+        exercise_template_id: "05293BCA",
+        sets: [
+          {
+            type: "normal",
+            weight_kg: 100,
+            reps: 10,
+          },
+        ],
+      },
+    ],
+  },
 });
 ```
 
