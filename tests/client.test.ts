@@ -266,12 +266,8 @@ describe("HevyClient", () => {
       id: "123",
       title: mockWorkout.title,
       description: mockWorkout.description,
-      start_time: Math.floor(
-        new Date(mockWorkout.start_time).getTime() / 1000
-      ),
-      end_time: Math.floor(
-        new Date(mockWorkout.end_time).getTime() / 1000
-      ),
+      start_time: Math.floor(new Date(mockWorkout.start_time).getTime() / 1000),
+      end_time: Math.floor(new Date(mockWorkout.end_time).getTime() / 1000),
       updated_at: "2024-01-01T11:00:00Z",
       created_at: "2024-01-01T10:00:00Z",
       exercises: [
@@ -424,6 +420,7 @@ describe("HevyClient", () => {
       const mockRoutine = {
         routine: {
           title: "Test Routine",
+          folder_id: null,
           exercises: [
             {
               exercise_template_id: "TEST123",

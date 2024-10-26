@@ -1,6 +1,6 @@
 {
   "name": "hevy-client",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "main": "dist/index.js",
   "homepage": "https://github.com/kuhiga/hevy-api-client#readme",
   "author": "kuhiga",
