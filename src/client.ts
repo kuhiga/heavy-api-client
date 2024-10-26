@@ -1,20 +1,26 @@
 import fetch, { RequestInit } from "node-fetch";
 import {
-  Pagination,
-  Workout,
-  Routine,
-  CreateWorkout,
-  WorkoutsResponse,
-  WorkoutEventsResponse,
-  RoutinesResponse,
-  CreateRoutinesResponse,
-  ExerciseTemplatesResponse,
-  ExerciseTemplate,
-  GetRoutineFoldersResponse,
-  PostRoutinesResponse,
-  RoutineFolderResponse,
-  CreateWorkoutResponse,
-} from "./types";
+  GetV1WorkoutsResponse,
+  PostWorkoutsRequestBody,
+  PostV1WorkoutsResponse,
+  GetV1WorkoutsCountResponse,
+  GetV1WorkoutsEventsResponse,
+  GetV1WorkoutsByWorkoutIdResponse,
+  GetV1WorkoutsData,
+  GetV1WorkoutsEventsData,
+  GetV1RoutinesData,
+  GetV1RoutinesResponse,
+  PostRoutinesRequestBody,
+  PostV1RoutinesResponse,
+  GetV1ExerciseTemplatesData,
+  GetV1ExerciseTemplatesResponse,
+  GetV1ExerciseTemplatesByExerciseTemplateIdResponse,
+  GetV1RoutineFoldersData,
+  GetV1RoutineFoldersResponse,
+  PostV1RoutineFoldersData,
+  PostV1RoutineFoldersResponse,
+  GetV1RoutineFoldersByFolderIdResponse,
+} from "./types.js";
 import { HEVY_BASE_URL } from "./constants";
 import { HevyAPIError } from "./error";
 
@@ -70,78 +76,88 @@ export class HevyClient {
   }
 
   async getWorkouts(
-    params: Pagination = { page: 1, pageSize: 5 }
-  ): Promise<WorkoutsResponse> {
-    return this.request("/workouts", { method: "GET" }, params);
+    pagination: GetV1WorkoutsData = { page: 1, pageSize: 5 }
+  ): Promise<GetV1WorkoutsResponse> {
+    return this.request("/workouts", { method: "GET" }, pagination);
   }
 
-  async createWorkout(workout: CreateWorkout): Promise<CreateWorkoutResponse> {
+  async createWorkout(
+    workout: PostWorkoutsRequestBody
+  ): Promise<PostV1WorkoutsResponse> {
     return this.request("/workouts", {
       method: "POST",
-      body: JSON.stringify({ workout }),
+      body: JSON.stringify(workout),
     });
   }
 
   async getWorkoutCount(): Promise<number> {
-    const response = await this.request<{ workout_count: number }>(
+    const response = await this.request<GetV1WorkoutsCountResponse>(
       "/workouts/count",
       { method: "GET" }
     );
-    return response.workout_count;
+    return response.workout_count ?? 0;
   }
 
   async getWorkoutEvents(
-    params: Pagination & { since?: string } = {
+    pagination: GetV1WorkoutsEventsData = {
       page: 1,
       pageSize: 5,
     }
-  ): Promise<WorkoutEventsResponse> {
-    return this.request("/workouts/events", { method: "GET" }, params);
+  ): Promise<GetV1WorkoutsEventsResponse> {
+    return this.request("/workouts/events", { method: "GET" }, pagination);
   }
 
-  async getWorkout(workoutId: string): Promise<Workout> {
+  async getWorkout(
+    workoutId: string
+  ): Promise<GetV1WorkoutsByWorkoutIdResponse> {
     return this.request(`/workouts/${workoutId}`, { method: "GET" });
   }
 
   async getRoutines(
-    params: Pagination = { page: 1, pageSize: 5 }
-  ): Promise<RoutinesResponse> {
-    return this.request("/routines", { method: "GET" }, params);
+    pagination: GetV1RoutinesData = { page: 1, pageSize: 5 }
+  ): Promise<GetV1RoutinesResponse> {
+    return this.request("/routines", { method: "GET" }, pagination);
   }
 
-  async createRoutine(routine: Routine): Promise<CreateRoutinesResponse> {
+  async createRoutine(
+    routine: PostRoutinesRequestBody
+  ): Promise<PostV1RoutinesResponse> {
     return this.request("/routines", {
       method: "POST",
-      body: JSON.stringify({ routine }),
+      body: JSON.stringify(routine),
     });
   }
 
   async getExerciseTemplates(
-    params: Pagination = { page: 1, pageSize: 5 }
-  ): Promise<ExerciseTemplatesResponse> {
-    return this.request("/exercise_templates", { method: "GET" }, params);
+    pagination: GetV1ExerciseTemplatesData = { page: 1, pageSize: 5 }
+  ): Promise<GetV1ExerciseTemplatesResponse> {
+    return this.request("/exercise_templates", { method: "GET" }, pagination);
   }
 
-  async getExerciseTemplate(templateId: string): Promise<ExerciseTemplate> {
+  async getExerciseTemplate(
+    templateId: string
+  ): Promise<GetV1ExerciseTemplatesByExerciseTemplateIdResponse> {
     return this.request(`/exercise_templates/${templateId}`, { method: "GET" });
   }
 
   async getRoutineFolders(
-    params: Pagination = { page: 1, pageSize: 5 }
-  ): Promise<GetRoutineFoldersResponse> {
-    return this.request("/routine_folders", { method: "GET" }, params);
+    pagination: GetV1RoutineFoldersData = { page: 1, pageSize: 5 }
+  ): Promise<GetV1RoutineFoldersResponse> {
+    return this.request("/routine_folders", { method: "GET" }, pagination);
   }
 
-  async createRoutineFolder(folder: {
-    title: string;
-  }): Promise<PostRoutinesResponse> {
+  async createRoutineFolder(
+    folder: PostV1RoutineFoldersData
+  ): Promise<PostV1RoutineFoldersResponse> {
     return this.request("/routine_folders", {
       method: "POST",
-      body: JSON.stringify({ routine_folder: folder }),
+      body: JSON.stringify(folder),
     });
   }
 
-  async getRoutineFolder(folderId: number): Promise<RoutineFolderResponse> {
+  async getRoutineFolder(
+    folderId: number
+  ): Promise<GetV1RoutineFoldersByFolderIdResponse> {
     return this.request(`/routine_folders/${folderId}`, { method: "GET" });
   }
 }

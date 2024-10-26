@@ -1,6 +1,6 @@
 {
   "name": "hevy-client",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "main": "dist/index.js",
   "homepage": "https://github.com/kuhiga/hevy-api-client#readme",
   "author": "kuhiga",
@@ -11,7 +11,8 @@
     "prepare": "npm run build",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "openapi-ts": "openapi-ts"
   },
   "repository": {
     "type": "git",
@@ -28,6 +29,7 @@
     "node-fetch": "^2.7.0"
   },
   "devDependencies": {
+    "@hey-api/openapi-ts": "^0.53.12",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.7.9",
     "@types/node-fetch": "^2.6.11",

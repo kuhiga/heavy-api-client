@@ -1,14 +1,6 @@
 import { HevyClient } from "../src/client";
 import { HEVY_BASE_URL } from "../src/constants";
-import {
-  CreateWorkout,
-  ExerciseTemplate,
-  ExerciseTemplatesResponse,
-  GetRoutineFoldersResponse,
-  PostRoutinesResponse,
-  Routine,
-  RoutineFolderResponse,
-} from "../src/types";
+
 import fetch, { Response } from "node-fetch";
 import { HevyAPIError } from "../src/error";
 
@@ -72,7 +64,7 @@ describe("HevyClient", () => {
     });
   };
 
-  const createMockWorkout = (): CreateWorkout => ({
+  const createMockWorkout = () => ({
     title: "Test Workout",
     description: "Test Description",
     start_time: "2024-01-01T10:00:00Z",
@@ -274,8 +266,12 @@ describe("HevyClient", () => {
       id: "123",
       title: mockWorkout.title,
       description: mockWorkout.description,
-      start_time: Math.floor(new Date(mockWorkout.start_time).getTime() / 1000),
-      end_time: Math.floor(new Date(mockWorkout.end_time).getTime() / 1000),
+      start_time: Math.floor(
+        new Date(mockWorkout.start_time).getTime() / 1000
+      ),
+      end_time: Math.floor(
+        new Date(mockWorkout.end_time).getTime() / 1000
+      ),
       updated_at: "2024-01-01T11:00:00Z",
       created_at: "2024-01-01T10:00:00Z",
       exercises: [
@@ -299,7 +295,7 @@ describe("HevyClient", () => {
     it("should create a workout successfully", async () => {
       mockFetch.mockImplementationOnce(() => mockJsonResponse(mockResponse));
 
-      const result = await client.createWorkout(mockWorkout);
+      const result = await client.createWorkout({ workout: mockWorkout });
 
       expect(result).toEqual(mockResponse);
       expect(mockFetch).toHaveBeenCalledWith(
@@ -323,9 +319,9 @@ describe("HevyClient", () => {
         )
       );
 
-      await expect(client.createWorkout(mockWorkout)).rejects.toThrow(
-        HevyAPIError
-      );
+      await expect(
+        client.createWorkout({ workout: mockWorkout })
+      ).rejects.toThrow(HevyAPIError);
     });
   });
 
@@ -425,18 +421,20 @@ describe("HevyClient", () => {
   });
   describe("createRoutine", () => {
     it("should create a routine", async () => {
-      const mockRoutine: Routine = {
-        title: "Test Routine",
-        exercises: [
-          {
-            exercise_template_id: "TEST123",
-            sets: [{ type: "normal", weight_kg: 100, reps: 10 }],
-          },
-        ],
+      const mockRoutine = {
+        routine: {
+          title: "Test Routine",
+          exercises: [
+            {
+              exercise_template_id: "TEST123",
+              sets: [{ type: "normal", weight_kg: 100, reps: 10 }],
+            },
+          ],
+        },
       };
       const mockResponse = {
         id: "123",
-        title: mockRoutine.title,
+        title: mockRoutine.routine.title,
         folder_id: null,
         updated_at: "2024-01-01T00:00:00Z",
         created_at: "2024-01-01T00:00:00Z",
@@ -466,14 +464,14 @@ describe("HevyClient", () => {
         `${HEVY_BASE_URL}/routines`,
         expect.objectContaining({
           method: "POST",
-          body: JSON.stringify({ routine: mockRoutine }),
+          body: JSON.stringify(mockRoutine),
         })
       );
     });
   });
 
   describe("Exercise Templates", () => {
-    const mockTemplate: ExerciseTemplate = {
+    const mockTemplate = {
       id: "template123",
       title: "Bench Press",
       type: "weight_reps",
@@ -483,7 +481,7 @@ describe("HevyClient", () => {
     };
 
     describe("getExerciseTemplates", () => {
-      const mockResponse: ExerciseTemplatesResponse = {
+      const mockResponse = {
         page: 1,
         page_count: 5,
         exercise_templates: [mockTemplate],
@@ -518,7 +516,7 @@ describe("HevyClient", () => {
   });
 
   describe("Routine Folders", () => {
-    const mockFolder: RoutineFolderResponse = {
+    const mockFolder = {
       id: 42,
       index: 1,
       title: "Test Folder",
@@ -527,7 +525,7 @@ describe("HevyClient", () => {
     };
 
     describe("getRoutineFolders", () => {
-      const mockResponse: GetRoutineFoldersResponse = {
+      const mockResponse = {
         page: 1,
         page_count: 5,
         routine_folders: [mockFolder],
@@ -548,8 +546,8 @@ describe("HevyClient", () => {
 
     describe("createRoutineFolder", () => {
       it("should create a routine folder", async () => {
-        const folderData = { title: "New Folder" };
-        const mockResponse: PostRoutinesResponse = {
+        const folderData = { routine_folder: { title: "New Folder" } };
+        const mockResponse = {
           id: 42,
           index: 1,
           title: "New Folder",
@@ -566,7 +564,7 @@ describe("HevyClient", () => {
           `${HEVY_BASE_URL}/routine_folders`,
           expect.objectContaining({
             method: "POST",
-            body: JSON.stringify({ routine_folder: folderData }),
+            body: JSON.stringify(folderData),
           })
         );
       });
