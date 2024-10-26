@@ -2,7 +2,7 @@ export type PostWorkoutsRequestSet = {
   /**
    * The type of the set.
    */
-  type: "warmup" | "normal" | "failure" | "dropset";
+  type: "warmup" | "normal" | "failure" | "dropset" | string;
   /**
    * The weight in kilograms.
    */
@@ -72,7 +72,7 @@ export type PostRoutinesRequestSet = {
   /**
    * The type of the set.
    */
-  type: "warmup" | "normal" | "failure" | "dropset";
+  type: "warmup" | "normal" | "failure" | "dropset" | string;
   /**
    * The weight in kilograms.
    */
