@@ -53,11 +53,11 @@ export type PostWorkoutsRequestBody = {
      */
     description?: string | null;
     /**
-     * The time the workout started.
+     * ISO 8601 timestamp of when the workout was recorded to have started.
      */
     start_time: string;
     /**
-     * The time the workout ended.
+     * ISO 8601 timestamp of when the workout was recorded to have ended.
      */
     end_time: string;
     /**
