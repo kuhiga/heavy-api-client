@@ -53,11 +53,11 @@ export type PostWorkoutsRequestBody = {
      */
     description?: string | null;
     /**
-     * The time the workout started.
+     * ISO 8601 timestamp of when the workout was recorded to have started.
      */
     start_time: string;
     /**
-     * The time the workout ended.
+     * ISO 8601 timestamp of when the workout was recorded to have ended.
      */
     end_time: string;
     /**
@@ -399,11 +399,11 @@ export type GetV1WorkoutsResponse = {
   /**
    * Current page number
    */
-  page?: number;
+  page: number;
   /**
    * Total number of pages
    */
-  page_count?: number;
+  page_count: number;
   workouts?: Array<Workout>;
 };
 
@@ -487,11 +487,11 @@ export type GetV1RoutinesResponse = {
   /**
    * Current page number
    */
-  page?: number;
+  page: number;
   /**
    * Total number of pages
    */
-  page_count?: number;
+  page_count: number;
   routines?: Array<Routine>;
 };
 
@@ -528,11 +528,11 @@ export type GetV1ExerciseTemplatesResponse = {
   /**
    * Current page number
    */
-  page?: number;
+  page: number;
   /**
    * Total number of pages
    */
-  page_count?: number;
+  page_count: number;
   exercise_templates?: Array<ExerciseTemplate>;
 };
 
@@ -565,11 +565,11 @@ export type GetV1RoutineFoldersResponse = {
   /**
    * Current page number
    */
-  page?: number;
+  page: number;
   /**
    * Total number of pages
    */
-  page_count?: number;
+  page_count: number;
   routine_folders?: Array<RoutineFolder>;
 };
 
